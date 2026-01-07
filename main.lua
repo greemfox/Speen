@@ -1,13 +1,11 @@
 -- TODO:
--- [x] normalize coords
----- [x] center the drawing
 -- [ ] draw points
 -- [ ] connect points
 -- [ ] repeat
 width, height = love.graphics.getDimensions()
-function drawNormalized(normalizedX, normalizedY, imgPath, scale)
-    local imgPath = imgPath or '^^.png'
+function drawNormalized(normalizedX, normalizedY, scale, imgPath)
     local scale = scale or 0.1
+    local imgPath = imgPath or '^^.png'
     local img = love.graphics.newImage(imgPath)
     local imgWidth, imgHeight = img:getDimensions()
     local x = (normalizedX + 1) * (width / 2) - (imgWidth * scale / 2)
@@ -16,7 +14,5 @@ function drawNormalized(normalizedX, normalizedY, imgPath, scale)
 end
 
 function love.draw()
-    for i = -1, 1, 0.01 do
-        drawNormalized(i, i)
-    end
+    drawNormalized(0, 0)
 end
