@@ -19,47 +19,52 @@ function project(x, y, z, fov)
     local focal_length = 1 / (math.tan(fov / 2))
     local x = focal_length * x / z
     local y = focal_length * y / z
-    return -x, -y -- The actual projected image is mirrored both ways
+    return x, y
 end
 
 -- Take a point in 3D space and draw it
-function draw3d(x, y, z, fov)
-    local x, y = project(x, y, z, fov)
-    drawNormalized(x, y, 1 / z)
+function draw3d(x, y, z)
+    local x, y = project(x, y, z)
+    drawNormalized(x, y, 0.5 / math.abs(z))
 end
 
--- Rotate in the AB plane
-function rotato(a, b, angle)
+-- Rotate around the Y axis
+function rotateXZ(x, z, angle)
     local angle = angle
-    local newA = a * math.cos(angle) + b * math.sin(angle)
-    local newB = b * math.cos(angle) - a * math.sin(angle)
-    return newA, newB
+    local newX = x * math.cos(angle) + z * math.sin(angle)
+    local newZ = z * math.cos(angle) - x * math.sin(angle)
+    return newX, newZ
 end
 
-local z1 = 3
-local z2 = 2
+z1 = -1
+z2 = z1 - 1
+halfside = 0.5
 local vertices = {
-    { -0.5, 0.5,  z1 },
-    { 0.5,  0.5,  z1 },
-    { -0.5, -0.5, z1 },
-    { 0.5,  -0.5, z1 },
+    { -halfside, halfside,  z1 },
+    { halfside,  halfside,  z1 },
+    { -halfside, -halfside, z1 },
+    { halfside,  -halfside, z1 },
 
-    { -0.5, 0.5,  z2 },
-    { 0.5,  0.5,  z2 },
-    { -0.5, -0.5, z2 },
-    { 0.5,  -0.5, z2 },
+    { -halfside, halfside,  z2 },
+    { halfside,  halfside,  z2 },
+    { -halfside, -halfside, z2 },
+    { halfside,  -halfside, z2 },
 }
 
 function love.update(dt)
-    for i = 1, #vertices, 1 do
-        local x, z = rotato(vertices[i][1], vertices[i][3], math.pi / 3 * dt)
-        local y = vertices[i][2]
-        vertices[i] = { x, y, z }
+    local angle = dt * 2 -- Rads per second
+    for i = 1, #vertices do
+        local x, y, z = unpack(vertices[i])
+        local t = math.abs(z1 + z2) / 2
+        local tz = z + t
+        local rx, rz = rotateXZ(x, tz, angle)
+        local rz = rz - t
+        vertices[i] = { rx, y, rz }
     end
 end
 
 function love.draw()
-    for i = 1, #vertices, 1 do
+    for i = 1, #vertices do
         draw3d(unpack(vertices[i]))
     end
 end
