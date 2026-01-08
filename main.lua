@@ -1,3 +1,19 @@
+-- Define the cube
+local z1 = -1
+local side = 1
+local z2 = z1 - side
+local halfside = side / 2
+local vertices = {
+    { -halfside, halfside,  z1 },
+    { halfside,  halfside,  z1 },
+    { -halfside, -halfside, z1 },
+    { halfside,  -halfside, z1 },
+    { -halfside, halfside,  z2 },
+    { halfside,  halfside,  z2 },
+    { -halfside, -halfside, z2 },
+    { halfside,  -halfside, z2 },
+}
+
 -- Take absolute coords and normalize them
 function normalizeCoords(x, y)
     local x = x or 0
@@ -75,22 +91,6 @@ function spinCubeYZ(dt, speenFactor)
     end
 end
 
-z1 = -1
-side = 1
-z2 = z1 - side
-halfside = side / 2
-vertices = {
-    { -halfside, halfside,  z1 },
-    { halfside,  halfside,  z1 },
-    { -halfside, -halfside, z1 },
-    { halfside,  -halfside, z1 },
-
-    { -halfside, halfside,  z2 },
-    { halfside,  halfside,  z2 },
-    { -halfside, -halfside, z2 },
-    { halfside,  -halfside, z2 },
-}
-
 function love.load()
     winSide = love.graphics.getDimensions()
     love.window.setMode(winSide, winSide)
@@ -99,7 +99,8 @@ function love.load()
 end
 
 function love.draw()
-    -- Gotta figure out a way to z-order them dynamically
+    -- Literally just sort the points by Z before drawing
+    table.sort(vertices, function(a, b) return a[3] < b[3] end)
     for i = 1, #vertices do
         draw3d(unpack(vertices[i]))
     end
@@ -108,6 +109,7 @@ end
 function love.update(dt)
     local newX, newY = normalizeCoords(love.mouse.getPosition())
     local dx, dy = 0, 0
+
     handlingCube.active = false
     if love.mouse.isDown(1, 2) then
         if newX ~= handlingCube.oldX then
@@ -128,6 +130,7 @@ function love.update(dt)
             spinCubeYZ(dt, speenFactorY)
         end
     end
+
     love.mouse.setRelativeMode(handlingCube.active)
     handlingCube.oldX, handlingCube.oldY = newX, newY
 end
