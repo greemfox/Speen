@@ -41,11 +41,45 @@ function rotateXZ(x, z, angle)
     return newX, newZ
 end
 
-local z1 = -1
-local side = 1
-local z2 = z1 - side
-local halfside = side / 2
-local vertices = {
+-- Rotate around the X axis
+function rotateYZ(y, z, angle)
+    local angle = angle
+    local newY = y * math.cos(angle) - z * math.sin(angle)
+    local newZ = z * math.cos(angle) + y * math.sin(angle)
+    return newY, newZ
+end
+
+-- Spin the doggamn cube around Y
+function spinCubeXZ(dt, speenFactor)
+    local angle = dt * speenFactor
+    for i = 1, #vertices do
+        local x, y, z = unpack(vertices[i])
+        local t = math.abs(z1 + z2) / 2
+        local tz = z + t
+        local rx, rz = rotateXZ(x, tz, angle)
+        rz = rz - t
+        vertices[i] = { rx, y, rz }
+    end
+end
+
+-- Spin the doggamn cube around X
+function spinCubeYZ(dt, speenFactor)
+    local angle = dt * speenFactor
+    for i = 1, #vertices do
+        local x, y, z = unpack(vertices[i])
+        local t = math.abs(z1 + z2) / 2
+        local tz = z + t
+        local ry, rz = rotateYZ(y, tz, angle)
+        rz = rz - t
+        vertices[i] = { x, ry, rz }
+    end
+end
+
+z1 = -1
+side = 1
+z2 = z1 - side
+halfside = side / 2
+vertices = {
     { -halfside, halfside,  z1 },
     { halfside,  halfside,  z1 },
     { -halfside, -halfside, z1 },
@@ -61,48 +95,39 @@ function love.load()
     winSide = love.graphics.getDimensions()
     love.window.setMode(winSide, winSide)
     love.window.setTitle("Speeen")
-    handlingCube = { active = false, oldX = 0 }
+    handlingCube = { active = false, oldX = 0, oldY = 0 }
 end
 
 function love.draw()
+    -- Gotta figure out a way to z-order them dynamically
     for i = 1, #vertices do
         draw3d(unpack(vertices[i]))
     end
 end
 
 function love.update(dt)
-    newX = normalizeCoords(love.mouse.getX())
-    dx = 0
+    local newX, newY = normalizeCoords(love.mouse.getPosition())
+    local dx, dy = 0, 0
     handlingCube.active = false
     if love.mouse.isDown(1, 2) then
         if newX ~= handlingCube.oldX then
             dx = handlingCube.oldX - newX
             handlingCube.active = true
         end
-
-        speenFactor = 100
+        local speenFactorX = 100 * dx
         if handlingCube.active then
-            local angle = dt * dx * speenFactor
-            for i = 1, #vertices do
-                local x, y, z = unpack(vertices[i])
-                local t = math.abs(z1 + z2) / 2
-                local tz = z + t
-                local rx, rz = rotateXZ(x, tz, angle)
-                local rz = rz - t
-                vertices[i] = { rx, y, rz }
-            end
+            spinCubeXZ(dt, speenFactorX)
         end
-    else
-        local angle = dt * -newX
-        for i = 1, #vertices do
-            local x, y, z = unpack(vertices[i])
-            local t = math.abs(z1 + z2) / 2
-            local tz = z + t
-            local rx, rz = rotateXZ(x, tz, angle)
-            local rz = rz - t
-            vertices[i] = { rx, y, rz }
+
+        if newY ~= handlingCube.oldY then
+            dy = handlingCube.oldY - newY
+            handlingCube.active = true
+        end
+        local speenFactorY = 100 * dy
+        if handlingCube.active then
+            spinCubeYZ(dt, speenFactorY)
         end
     end
     love.mouse.setRelativeMode(handlingCube.active)
-    handlingCube.oldX = newX
+    handlingCube.oldX, handlingCube.oldY = newX, newY
 end
