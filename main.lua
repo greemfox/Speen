@@ -1,6 +1,11 @@
-winSide = love.graphics.getDimensions()
-love.window.setMode(winSide, winSide)
-love.window.setTitle("Speeen")
+-- Take absolute coords and normalize them
+function normalizeCoords(x, y)
+    local x = x or 0
+    local y = y or 0
+    local nx = (2 * x / winSide - 1)
+    local ny = (2 * y / winSide + 1)
+    return nx, ny
+end
 
 -- Take normalized coords and draw an image
 function drawNormalized(normalizedX, normalizedY, scale, imgPath)
@@ -36,10 +41,10 @@ function rotateXZ(x, z, angle)
     return newX, newZ
 end
 
-z1 = -1
-side = 1
-z2 = z1 - side
-halfside = side / 2
+local z1 = -1
+local side = 1
+local z2 = z1 - side
+local halfside = side / 2
 local vertices = {
     { -halfside, halfside,  z1 },
     { halfside,  halfside,  z1 },
@@ -52,20 +57,52 @@ local vertices = {
     { halfside,  -halfside, z2 },
 }
 
-function love.update(dt)
-    local angle = dt * 2 -- Rads per second
-    for i = 1, #vertices do
-        local x, y, z = unpack(vertices[i])
-        local t = math.abs(z1 + z2) / 2
-        local tz = z + t
-        local rx, rz = rotateXZ(x, tz, angle)
-        local rz = rz - t
-        vertices[i] = { rx, y, rz }
-    end
+function love.load()
+    winSide = love.graphics.getDimensions()
+    love.window.setMode(winSide, winSide)
+    love.window.setTitle("Speeen")
+    handlingCube = { active = false, oldX = 0 }
 end
 
 function love.draw()
     for i = 1, #vertices do
         draw3d(unpack(vertices[i]))
     end
+end
+
+function love.update(dt)
+    newX = normalizeCoords(love.mouse.getX())
+    dx = 0
+    handlingCube.active = false
+    if love.mouse.isDown(1, 2) then
+        if newX ~= handlingCube.oldX then
+            dx = handlingCube.oldX - newX
+            handlingCube.active = true
+        end
+
+        speenFactor = 100
+        if handlingCube.active then
+            local angle = dt * dx * speenFactor
+            for i = 1, #vertices do
+                local x, y, z = unpack(vertices[i])
+                local t = math.abs(z1 + z2) / 2
+                local tz = z + t
+                local rx, rz = rotateXZ(x, tz, angle)
+                local rz = rz - t
+                vertices[i] = { rx, y, rz }
+            end
+        end
+    else
+        local angle = dt * -newX
+        for i = 1, #vertices do
+            local x, y, z = unpack(vertices[i])
+            local t = math.abs(z1 + z2) / 2
+            local tz = z + t
+            local rx, rz = rotateXZ(x, tz, angle)
+            local rz = rz - t
+            vertices[i] = { rx, y, rz }
+        end
+    end
+    love.mouse.setRelativeMode(handlingCube.active)
+    handlingCube.oldX = newX
 end
