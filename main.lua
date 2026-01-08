@@ -36,7 +36,7 @@ end
 
 -- Project coords from a 3D space behind the screen onto the screen
 function project(x, y, z, fov)
-    local fov = fov or (math.pi / 2) -- 90 deg
+    local fov = fov or (math.pi / 2) -- 50 deg
     local focal_length = 1 / (math.tan(fov / 2))
     local x = focal_length * x / z
     local y = focal_length * y / z
@@ -95,7 +95,7 @@ function love.load()
     winSide = love.graphics.getDimensions()
     love.window.setMode(winSide, winSide)
     love.window.setTitle("Speeen")
-    handlingCube = { active = false, oldX = 0, oldY = 0 }
+    handlingCube = { active = false, oldX = 0, oldY = 0, oldDX = 0, oldDY = 0 }
 end
 
 function love.draw()
@@ -108,29 +108,29 @@ end
 
 function love.update(dt)
     local newX, newY = normalizeCoords(love.mouse.getPosition())
-    local dx, dy = 0, 0
+    local dampening = 0.95
+    local newDX, newDY = dampening * handlingCube.oldDX, dampening * handlingCube.oldDY
 
     handlingCube.active = false
     if love.mouse.isDown(1, 2) then
         if newX ~= handlingCube.oldX then
-            dx = handlingCube.oldX - newX
+            newDX = handlingCube.oldX - newX
             handlingCube.active = true
-        end
-        local speenFactorX = 100 * dx
-        if handlingCube.active then
-            spinCubeXZ(dt, speenFactorX)
         end
 
         if newY ~= handlingCube.oldY then
-            dy = handlingCube.oldY - newY
+            newDY = handlingCube.oldY - newY
             handlingCube.active = true
-        end
-        local speenFactorY = 100 * dy
-        if handlingCube.active then
-            spinCubeYZ(dt, speenFactorY)
         end
     end
 
+    local speenFactorX = 100 * newDX
+    local speenFactorY = 100 * newDY
+    spinCubeXZ(dt, speenFactorX or 0)
+    spinCubeYZ(dt, speenFactorY or 0)
+
+
     love.mouse.setRelativeMode(handlingCube.active)
     handlingCube.oldX, handlingCube.oldY = newX, newY
+    handlingCube.oldDX, handlingCube.oldDY = newDX, newDY
 end
