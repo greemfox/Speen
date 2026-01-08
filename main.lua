@@ -15,7 +15,7 @@ end
 
 -- Project coords from a 3D space behind the screen onto the screen
 function project(x, y, z, fov)
-    local fov = fov or (0.5 * math.pi) -- 90 deg
+    local fov = fov or (math.pi / 2) -- 90 deg
     local focal_length = 1 / (math.tan(fov / 2))
     local x = focal_length * x / z
     local y = focal_length * y / z
@@ -37,8 +37,9 @@ function rotateXZ(x, z, angle)
 end
 
 z1 = -1
-z2 = z1 - 1
-halfside = 0.5
+side = 1
+z2 = z1 - side
+halfside = side / 2
 local vertices = {
     { -halfside, halfside,  z1 },
     { halfside,  halfside,  z1 },
