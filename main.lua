@@ -95,6 +95,7 @@ function love.load()
     winSide = love.graphics.getDimensions()
     love.window.setMode(winSide, winSide)
     love.window.setTitle("Speeen")
+    love.window.setIcon(love.image.newImageData("^^.png"))
     handlingCube = { active = false, oldX = 0, oldY = 0, oldDX = 0, oldDY = 0 }
 end
 
