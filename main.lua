@@ -24,10 +24,8 @@ function normalizeCoords(x, y)
 end
 
 -- Take normalized coords and draw an image
-function nDrawImage(nx, ny, scale, imgPath)
+function nDrawImage(nx, ny, scale)
     local scale = scale or 0.5
-    local imgPath = imgPath or '^^.png'
-    local img = love.graphics.newImage(imgPath)
     local imgWidth, imgHeight = img:getDimensions()
     local x = (nx + 1) * (winSide / 2) - (imgWidth * scale / 2)
     local y = (ny - 1) * (-winSide / 2) - (imgHeight * scale / 2)
@@ -101,6 +99,8 @@ function spinCubeYZ(dt, speenFactor)
 end
 
 function love.load()
+    local imgPath = '^^.png'
+    img = love.graphics.newImage(imgPath)
     winSide = love.graphics.getDimensions()
     isCubeHeld = false
     oldX = 0
