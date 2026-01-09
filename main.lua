@@ -72,29 +72,20 @@ function rotateYZ(y, z, angle)
     return newY, newZ
 end
 
--- Spin the doggamn cube around Y
-function spinCubeXZ(dt, speenFactor)
+-- Spin the doggamn cube
+function spinCube(axis, speenFactor, dt)
     local angle = dt * speenFactor
     for i = 1, #vertices do
         local x, y, z = unpack(vertices[i])
         local t = math.abs(z1 + z2) / 2
         local tz = z + t
-        local rx, rz = rotateXZ(x, tz, angle)
-        rz = rz - t
-        vertices[i] = { rx, y, rz }
-    end
-end
-
--- Spin the doggamn cube around X
-function spinCubeYZ(dt, speenFactor)
-    local angle = dt * speenFactor
-    for i = 1, #vertices do
-        local x, y, z = unpack(vertices[i])
-        local t = math.abs(z1 + z2) / 2
-        local tz = z + t
-        local ry, rz = rotateYZ(y, tz, angle)
-        rz = rz - t
-        vertices[i] = { x, ry, rz }
+        if axis == 'x' then
+            x, z = rotateXZ(x, tz, angle)
+        elseif axis == 'y' then
+            y, z = rotateYZ(y, tz, angle)
+        end
+        z = z - t
+        vertices[i] = { x, y, z }
     end
 end
 
@@ -137,8 +128,8 @@ function love.update(dt)
 
     local speenFactorX = 100 * newDX
     local speenFactorY = 100 * newDY
-    spinCubeXZ(dt, speenFactorX or 0)
-    spinCubeYZ(dt, speenFactorY or 0)
+    spinCube("x", speenFactorX or 0, dt)
+    spinCube("y", speenFactorY or 0, dt)
 
 
     love.mouse.setRelativeMode(isCubeHeld)
