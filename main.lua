@@ -24,19 +24,28 @@ function normalizeCoords(x, y)
 end
 
 -- Take normalized coords and draw an image
-function drawNormalized(normalizedX, normalizedY, scale, imgPath)
+function nDrawImage(nx, ny, scale, imgPath)
     local scale = scale or 0.5
     local imgPath = imgPath or '^^.png'
     local img = love.graphics.newImage(imgPath)
     local imgWidth, imgHeight = img:getDimensions()
-    local x = (normalizedX + 1) * (winSide / 2) - (imgWidth * scale / 2)
-    local y = (normalizedY - 1) * (-winSide / 2) - (imgHeight * scale / 2)
+    local x = (nx + 1) * (winSide / 2) - (imgWidth * scale / 2)
+    local y = (ny - 1) * (-winSide / 2) - (imgHeight * scale / 2)
     love.graphics.draw(img, x, y, 0, scale) -- 0 rads rotation
+end
+
+-- Take normalized coords and draw a line
+function nDrawLine(nx1, ny1, nx2, ny2)
+    local x1 = (nx1 + 1) * (winSide / 2)
+    local y1 = (ny1 - 1) * (-winSide / 2)
+    local x2 = (nx2 + 1) * (winSide / 2)
+    local y2 = (ny2 - 1) * (-winSide / 2)
+    love.graphics.line(x1, y1, x2, y2)
 end
 
 -- Project coords from a 3D space behind the screen onto the screen
 function project(x, y, z, fov)
-    local fov = fov or (math.pi / 2) -- 50 deg
+    local fov = fov or (math.pi / 2) -- 90 deg
     local focal_length = 1 / (math.tan(fov / 2))
     local x = focal_length * x / z
     local y = focal_length * y / z
@@ -46,7 +55,7 @@ end
 -- Take a point in 3D space and draw it
 function draw3d(x, y, z)
     local x, y = project(x, y, z)
-    drawNormalized(x, y, 0.5 / math.abs(z))
+    nDrawImage(x, y, 0.5 / math.abs(z))
 end
 
 -- Rotate around the Y axis
