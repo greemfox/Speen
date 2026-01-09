@@ -93,10 +93,11 @@ end
 
 function love.load()
     winSide = love.graphics.getDimensions()
-    love.window.setMode(winSide, winSide)
-    love.window.setTitle("Speeen")
-    love.window.setIcon(love.image.newImageData("^^.png"))
-    handlingCube = { active = false, oldX = 0, oldY = 0, oldDX = 0, oldDY = 0 }
+    isCubeHeld = false
+    oldX = 0
+    oldY = 0
+    oldDX = 0
+    oldDY = 0
 end
 
 function love.draw()
@@ -110,18 +111,18 @@ end
 function love.update(dt)
     local newX, newY = normalizeCoords(love.mouse.getPosition())
     local dampening = 0.95
-    local newDX, newDY = dampening * handlingCube.oldDX, dampening * handlingCube.oldDY
+    local newDX, newDY = dampening * oldDX, dampening * oldDY
 
-    handlingCube.active = false
+    isCubeHeld = false
     if love.mouse.isDown(1, 2) then
-        if newX ~= handlingCube.oldX then
-            newDX = handlingCube.oldX - newX
-            handlingCube.active = true
+        if newX ~= oldX then
+            newDX = oldX - newX
+            isCubeHeld = true
         end
 
-        if newY ~= handlingCube.oldY then
-            newDY = handlingCube.oldY - newY
-            handlingCube.active = true
+        if newY ~= oldY then
+            newDY = oldY - newY
+            isCubeHeld = true
         end
     end
 
@@ -131,7 +132,7 @@ function love.update(dt)
     spinCubeYZ(dt, speenFactorY or 0)
 
 
-    love.mouse.setRelativeMode(handlingCube.active)
-    handlingCube.oldX, handlingCube.oldY = newX, newY
-    handlingCube.oldDX, handlingCube.oldDY = newDX, newDY
+    love.mouse.setRelativeMode(isCubeHeld)
+    oldX, oldY = newX, newY
+    oldDX, oldDY = newDX, newDY
 end
