@@ -13,6 +13,7 @@ local vertices = {
     { -halfside, -halfside, z2 },
     { halfside,  -halfside, z2 },
 }
+-- For the edges I'd have to more or less hardcode them too one of these days
 
 -- Take absolute coords and normalize them
 function normalizeCoords(x, y)
@@ -27,8 +28,9 @@ end
 function nDrawImage(nx, ny, scale)
     local scale = scale or 0.5
     local imgWidth, imgHeight = img:getDimensions()
-    local x = (nx + 1) * (winSide / 2) - (imgWidth * scale / 2)
-    local y = (ny - 1) * (-winSide / 2) - (imgHeight * scale / 2)
+    local imgCenterPoint = imgWidth * scale / 2
+    local x = (nx + 1) * (winSide / 2) - imgCenterPoint
+    local y = (ny - 1) * (-winSide / 2) - imgCenterPoint
     love.graphics.draw(img, x, y, 0, scale) -- 0 rads rotation
 end
 
